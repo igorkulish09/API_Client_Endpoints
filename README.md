@@ -10,6 +10,8 @@ pip install rest_client_example
 JSONPlaceholder Client
 The Cat API Client
 
+Email Verification Service
+
 Type Annotations and Linter
 This package uses type annotations for better code clarity and is linted using wemake-python-styleguide.
 
