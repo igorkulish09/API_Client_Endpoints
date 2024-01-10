@@ -1,24 +1,51 @@
+"""Email verification."""
+
 from typing import Dict, List, Optional
 
+VerificationResult = Dict[str, Optional[bool]]
 
-class EmailVerificationService:
+
+class EmailVerificationService(object):
+    """
+    Service for verifying email addresses.
+
+    Attributes:
+        result_list (List[Dict[str, Optional[bool]]]): A list to store verification results.
+    """
+
     def __init__(self):
-        self.email_results: List[Dict[str, str]] = []
+        """
+        Initialize the EmailVerificationService.
 
-    def verify_email(self, email: str) -> Dict[str, str]:
-        # Simulate email verification logic
-        result = {"email": email, "status": "verified"}
-        self.email_results.append(result)
-        return result
+        This method sets up the initial state of the EmailVerificationService.
+        It creates an empty list to store verification results.
+        """
+        self.result_list = []
 
-    def get_all_results(self) -> List[Dict[str, str]]:
-        return self.email_results
+    def verify_email(self, email: str) -> Dict[str, bool]:
+        """
+        Verify the validity of an email address.
 
-    def get_result_by_email(self, email: str) -> Optional[Dict[str, str]]:
-        for result in self.email_results:
-            if result["email"] == email:
-                return result
-        return None
+        Args:
+            email (str): Email address to be verified.
 
-    def delete_result_by_email(self, email: str) -> None:
-        self.email_results = [result for result in self.email_results if result["email"] != email]
+        Returns:
+            Dict[str, bool]: A dictionary with the verification result (valid/invalid).
+        """
+        is_valid = '@' in email
+        res_ult = {'email': email, 'is_valid': is_valid}
+        self.result_list.append(res_ult)
+        return res_ult
+
+    def get_verification_results(self) -> List[VerificationResult]:
+        """
+        Retrieve the results of email verification.
+
+        Returns:
+            List[Dict[str, Optional[bool]]]: List of dictionaries with verification results.
+        """
+        return self.result_list
+
+    def clear_results(self):
+        """Clear the results of email verification."""
+        self.result_list = []

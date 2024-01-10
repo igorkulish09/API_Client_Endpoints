@@ -1,28 +1,44 @@
+"""This script initializes clients and services, performs various actions, and prints the results."""
+
+# Standard Library imports
 import asyncio
-from rest_clients_example.jsonplaceholder_client import JSONPlaceholderClient
-from rest_clients_example.thecatapi_client import TheCatAPIClient
-from rest_clients_example.email_verification_service import EmailVerificationService
+
+# Third-party imports
+import aiohttp
+from cat_viewer_client import async_get_cat_by_id, async_get_random_cats
+# Local imports
+from email_verification_service import EmailVerificationService
 
 
-async def main_async():
-    # Инициализация экземпляров клиентов и сервиса
-    jsonplaceholder_client = JSONPlaceholderClient()
-    thecatapi_client = TheCatAPIClient()
-    email_verification_service = EmailVerificationService()
+async def format_verification_results(verification_results):
+    """Format email verification results."""
+    formatted_results = []
+    for res_ult in verification_results:
+        email = res_ult['email']
+        is_valid = res_ult['is_valid']
+        formatted_results.append(f'Email: {email}, Valid: {is_valid}')  # noqa: WPS305
+    return formatted_results
 
-    # Методы клиентов и сервиса
-    posts = await jsonplaceholder_client.get_posts()
-    print(f"All Posts: {posts}")
 
-    cat_image = await thecatapi_client.get_random_cat_image()
-    print(f"Random Cat Image: {cat_image}")
+async def main():
+    """Asynchronous main function."""
+    async with aiohttp.ClientSession() as session:
+        # Asynchronously retrieve random cats
+        await async_get_random_cats(session)
 
-    email = "example@email.com"
-    verification_result = email_verification_service.verify_email(email)
-    print(f"Email Verification Result: {verification_result}")
+        # Asynchronously retrieve a specific cat
+        cat_id_to_get = 'g5'
+        await async_get_cat_by_id(session, cat_id_to_get)
 
-    all_results = email_verification_service.get_all_results()
-    print(f"All Email Verification Results: {all_results}")
+        # Asynchronously verify an email
+        email_service = EmailVerificationService()
+        email_to_verify = 'test@example.com'
+        await email_service.async_verify_email(email_to_verify)
 
-if __name__ == "__main__":
-    asyncio.run(main_async())
+        # Asynchronously retrieve email verification results
+        verification_results = await email_service.async_get_verification_results()
+        await format_verification_results(verification_results)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
