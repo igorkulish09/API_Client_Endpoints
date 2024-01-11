@@ -22,9 +22,9 @@ class EmailVerificationService(object):
         """
         self.result_list = []
 
-    def verify_email(self, email: str) -> Dict[str, bool]:
+    async def async_verify_email(self, email: str) -> Dict[str, bool]:
         """
-        Verify the validity of an email address.
+        Asynchronously verify the validity of an email address.
 
         Args:
             email (str): Email address to be verified.
@@ -37,9 +37,9 @@ class EmailVerificationService(object):
         self.result_list.append(res_ult)
         return res_ult
 
-    def get_verification_results(self) -> List[VerificationResult]:
+    async def async_get_verification_results(self) -> List[VerificationResult]:
         """
-        Retrieve the results of email verification.
+        Asynchronously retrieve the results of email verification.
 
         Returns:
             List[Dict[str, Optional[bool]]]: List of dictionaries with verification results.
