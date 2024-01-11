@@ -31,7 +31,7 @@ class EmailVerificationService:
             Dict[str, Optional[bool]]: A dictionary with the verification result (valid/invalid).
         """
         is_valid: Optional[bool] = '@' in email
-        result: Dict[str, Optional[bool]] = {'email': email, 'is_valid': is_valid}
+        result: Dict[str, Optional[bool]] = {'email': email, 'is_valid': bool(is_valid)}
         self.result_list.append(result)
         return result
 
