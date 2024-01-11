@@ -1,61 +1,52 @@
 """Module for interacting with the Cat API."""
 
-import asyncio
-import logging
-from typing import Dict, List
-
-# Third-party imports
-import aiohttp
-
-CAT_API_BASE_URL = 'https://api.thecatapi.com/v1'
+import requests
+from abc import ABC, abstractmethod
+from typing import List, Dict
 
 
-async def async_get_random_cats(session: aiohttp.ClientSession, limit: int = 5) -> List[Dict]:
-    """
-    Get random cats from The Cat API.
+class BaseHandler(ABC):
+    def __init__(self, client):
+        self.client = client
 
-    Args:
-        session (aiohttp.ClientSession): The aiohttp client session.
-        limit (int): The number of cats to retrieve (default is 5).
-
-    Returns:
-        List[Dict]: A list of dictionaries, each containing information about a random cat.
-    """
-    url = f'{CAT_API_BASE_URL}/images/search'  # noqa: WPS305
-    query_parameters = {'limit': limit}
-
-    async with session.get(url, params=query_parameters) as response:
-        return await response.json()
+    @abstractmethod
+    def handle(self) -> List[Dict]:
+        pass
 
 
-async def async_get_cat_by_id(session: aiohttp.ClientSession, cat_id: str) -> Dict:
-    """
-    Retrieve cat information by its ID.
-
-    Args:
-        session (aiohttp.ClientSession): The aiohttp client session.
-        cat_id (str): The ID of the cat.
-
-    Returns:
-        Dict: A dictionary containing cat information.
-    """
-    url = f'{CAT_API_BASE_URL}/images/{cat_id}'  # noqa: WPS305
-
-    async with session.get(url) as response:
-        return await response.json()
+class RandomCatImageHandler(BaseHandler):
+    def handle(self) -> List[Dict]:
+        response = self.client.make_request('/images/search')
+        data = response.json()
+        cat_id = data[0]['id']
+        return [{'image_url': data[0]['url'], 'cat_id': cat_id}]
 
 
-logger = logging.getLogger(__name__)
+class CatIdHandler(BaseHandler):
+    def handle(self) -> List[Dict]:
+        response = self.client.make_request('/images/search')
+        cat_id = response.json()[0]['id']
+        return [{'cat_id': cat_id}]
 
 
-async def main() -> None:
-    """Asynchronous main function."""
-    async with aiohttp.ClientSession() as session:
-        cats = await async_get_random_cats(session)
-        logger.info('Random Cats:')
-        for cat in cats:
-            logger.info(cat)
+class MyCatsClient:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.random_cat_image_handler = RandomCatImageHandler(self)
+        self.cat_id_handler = CatIdHandler(self)
 
+    def make_request(self, endpoint: str):
+        headers = {'x-api-key': self.api_key}
+        url = f'https://api.thecatapi.com/v1{endpoint}'
+        response = requests.get(url, headers=headers)
+        return response
 
-if __name__ == '__main__':
-    asyncio.run(main())
+# Using the client
+api_key = 'api_key=live_DaLQuR2bCgpxFTr235jX8CLwjF4PWBwEUu65gvxQko0damHACYGlRCKNpywMvrAB'
+client = MyCatsClient(api_key)
+random_cat_image_result = client.random_cat_image_handler.handle()
+cat_id_result = client.cat_id_handler.handle()
+
+# Working with the results
+print(random_cat_image_result)
+print(cat_id_result)
