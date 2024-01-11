@@ -1,10 +1,11 @@
 """Module for interacting with the Cat API."""
 
 import asyncio
-# Third-party imports
-import aiohttp  # noqa: I003,I005
-from typing import List, Dict  # noqa: I001
+import logging
+from typing import Dict, List
 
+# Third-party imports
+import aiohttp
 
 CAT_API_BASE_URL = 'https://api.thecatapi.com/v1'
 
@@ -44,11 +45,16 @@ async def async_get_cat_by_id(session: aiohttp.ClientSession, cat_id: str) -> Di
         return await response.json()
 
 
-async def main():
-    cats = await async_get_random_cats()
-    print('Random Cats:')
-    for cat in cats:
-        print(cat)
+logger = logging.getLogger(__name__)
+
+
+async def main() -> None:
+    """Asynchronous main function."""
+    async with aiohttp.ClientSession() as session:
+        cats = await async_get_random_cats(session)
+        logger.info('Random Cats:')
+        for cat in cats:
+            logger.info(cat)
 
 
 if __name__ == '__main__':
